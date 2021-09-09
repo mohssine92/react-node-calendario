@@ -1,25 +1,26 @@
-import moment from 'moment';
-
 import { types } from '../types/types';
 
+
+// {
+//     id: 'askdjhaksdjas',
+//     title: 'Cumpleaños del jefe',
+//     start: moment().toDate(),
+//     end: moment().add( 2, 'hours' ).toDate(),
+//     notes: 'Comprar el pastel',
+//     user: {
+//         _id: '123',
+//         name: 'Fernando'
+//     }
+// }
+
+
 const initialState = {
-    events: [{
-        id: new Date().getTime(),
-        title: 'Cumpleaños del jefe',
-        start: moment().toDate(),
-        end: moment().add( 2, 'hours' ).toDate(),
-        bgcolor: '#fafafa',
-        notes: 'Comprar el pastel',
-        user: {
-            _id: '123',
-            name: 'Fernando'
-        }
-    }],
+    events: [],
     activeEvent: null
 };
 
 
-export const calendarReducer = ( state = initialState, action ) => {
+export const calendarReducer = ( state = initialState, action ) => { // state injecta lo que esta en el store
 
     switch ( action.type ) {
         
@@ -30,9 +31,8 @@ export const calendarReducer = ( state = initialState, action ) => {
             }
         
         case types.eventAddNew:
-           
-
-        console.log(action.payload)
+            console.log(state)
+            console.log(initialState)
             return {
                 ...state,
                 events: [
@@ -54,17 +54,30 @@ export const calendarReducer = ( state = initialState, action ) => {
                 ...state,
                 events: state.events.map(
                     e => ( e.id === action.payload.id ) ? action.payload : e
-                )        // esta funcion de linea si coincide actulizalos sino dejelo tal cual 
+                )        //repasar todo y sustituye la coincidencia
             }
         
         case types.eventDeleted:
             return {
                 ...state,
                 events: state.events.filter(
-                    e => ( e.id !== state.activeEvent.id ) // evitar regresar en la coleccion el objeto que la persona mando a borrar
+                    e => ( e.id !== state.activeEvent.id ) // regresa todo menos la coincidencia que es evento actual 
                 ),
                 activeEvent: null // redefinir que no hay evento activo
             }
+
+        case types.eventLoaded:
+            return {
+                ...state,
+                events: [ ...action.payload ] // eventos form db 
+            } 
+            
+        case types.eventLogout:
+            
+            return {
+               ...initialState 
+            }   
+    
 
         default:
             return state;

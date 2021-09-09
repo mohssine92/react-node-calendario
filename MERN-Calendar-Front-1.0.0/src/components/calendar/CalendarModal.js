@@ -7,7 +7,7 @@ import DateTimePicker from 'react-datetime-picker';
 import Swal from 'sweetalert2';
 
 import { uiCloseModal } from '../../actions/ui';
-import { eventAddNew, eventClearActiveEvent, eventUpdated } from '../../actions/events';
+import {  eventClearActiveEvent, eventStartAddNew, eventStartUpdate } from '../../actions/events';
 
 
 const customStyles = {
@@ -77,7 +77,7 @@ export const CalendarModal = () => {
         setFormValues( initEvent ); // form a su estado inicial -
     }
 
-    const handleStartDateChange = ( e ) => { // e => fecha . es instancia de object date de js no es de moment libreria , hora seleccionada
+    const handleStartDateChange = ( e ) => { // e => fecha . es instancia de object date de js ,no es de moment libreria , hora seleccionada
         setDateStart( e ); // update value form html  
        // console.log(e)
         setFormValues({ // control state form 
@@ -120,17 +120,16 @@ export const CalendarModal = () => {
             // usada por validacion de boostrap de un input
         }
 
-        if ( activeEvent ) { // si exist , actualizamos
-            dispatch( eventUpdated( formValues ) )
+        if ( activeEvent ) { // si exist evento activo  , actualizamos
+
+            dispatch( eventStartUpdate(formValues) ) 
+
         } else {
-            dispatch( eventAddNew({
-                ...formValues,
-                id: new Date().getTime(),
-                user: {
-                    _id: '123',
-                    name: 'Mohssine'
-                }
-            }) );
+             //console.log(formValues)
+             //return;
+    
+            dispatch( eventStartAddNew(formValues) );
+
         }
 
 

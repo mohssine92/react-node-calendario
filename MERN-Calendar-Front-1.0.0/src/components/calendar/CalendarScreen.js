@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';// calendario de terceros 
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
@@ -12,13 +12,15 @@ import { uiOpenModal } from '../../actions/ui';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css'; // docs big-calendario
 import 'moment/locale/es'; // cambiar idioma de moment - porque en algunas parte trabaja calendario con moment : dias de la semana
-import { eventSetActive, eventClearActiveEvent } from '../../actions/events';
+import { eventSetActive, eventClearActiveEvent, eventStartLoading } from '../../actions/events';
 import { AddNewFab } from '../ui/AddNewFab';
 import { DeleteEventFab } from '../ui/DeleteEventFab';
 
 moment.locale('es');
 
 const localizer = momentLocalizer(moment); // docs de calendar
+
+
 
 export const CalendarScreen = () => {
 
@@ -27,6 +29,16 @@ export const CalendarScreen = () => {
     const { events, activeEvent } = useSelector( state => state.calendar ); // obtener cierto state del store del redux
 
     const [lastView, setLastView] = useState( localStorage.getItem('lastView') || 'month' ); // month primer uso , controlar state localmente
+
+    const { uid } = useSelector( state => state.auth ); // leer stor - obtener uid del user autenticado
+    
+    // disparo efecto , cuando se carga por primera vez el componente - requiere eventos - alimentar store por eventos from db  
+    useEffect(() => {
+        
+      dispatch( eventStartLoading() );
+     
+
+    }, [ dispatch ])
 
 
     // voy a crear un par de Eventos para estar pendiente de acciones que van a suceder , y obviamente voy a occupar reccionar en base de esas acciones
@@ -53,9 +65,11 @@ export const CalendarScreen = () => {
 
 
     const eventStyleGetter = ( event, start, end, isSelected ) => { // args disparados gracias a este calendario
+       // console.log(event) // en este punto tenemos instancias ed ebventos - traer objeto del user creador , comparo con user autenticado lo tengo en el store
+       // asi doy estilo diff a mis eventos ser como user autenticado .. y mas logica perzonalizada
         
         const style = {
-            backgroundColor: '#367CF7',
+            backgroundColor: ( uid === event.user._id ) ? '#367CF7' : '#465660', // ternario 
             borderRadius: '0px',
             opacity: 0.8,
             display: 'block',
@@ -74,9 +88,10 @@ export const CalendarScreen = () => {
             <Navbar />
             
             {/* calendario emite varios eventos ver docs */} {/* esas emmisiones sirve paraque lo que necesitan ustedes */}
+            
             <Calendar
-                localizer={ localizer }
-                events={ events } // eventos que voy a mandar al calendario 
+                localizer={ localizer } 
+                events={ events } // informacion eventos que voy a mandar al calendario 
                 startAccessor="start"
                 endAccessor="end"
                 messages={ messages } // objeto para cambiar idioma del calendario 
@@ -93,16 +108,15 @@ export const CalendarScreen = () => {
             />
 
 
+            <AddNewFab /> {/* + */}
 
-            <AddNewFab />
 
-
-            {   
+            {    /* por ddefault es null , selecciinado es objeto */
                 (activeEvent) && <DeleteEventFab />
             }
             
 
-            <CalendarModal /> {/*  no recibe ningun arg - trabajo con redux - voy a saber cual es el evento activo del store directamenet ... */}
+            <CalendarModal />  {/*  no recibe ningun arg - trabajo con redux - voy a saber cual es el evento activo del store directamenet ... */}
 
 
 
